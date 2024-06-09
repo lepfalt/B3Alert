@@ -2,6 +2,7 @@ using Microsoft.Extensions.Configuration;
 
 public class AppSettings {
     private EmailSetting EmailSetting { get; set; }
+    private ApiSetting ApiSetting { get; set; }
 
     public AppSettings() {
         var builder = new ConfigurationBuilder()
@@ -10,6 +11,19 @@ public class AppSettings {
 
         IConfiguration configuration = builder.Build();
 
+        setEmailSettings(configuration);
+        setApiSettings(configuration);
+    }
+
+    private void setApiSettings(IConfiguration configuration) {
+        var apiSettings = configuration.GetSection("QuotationApi");
+        ApiSetting = new ApiSetting(
+            baseUri: apiSettings["BaseUri"],
+            apiKey: apiSettings["ApiKey"]
+        );
+    }
+
+    private void setEmailSettings(IConfiguration configuration) {
         var emailSettingsInfo = configuration.GetSection("EmailSettings");
         var authType = emailSettingsInfo["AuthType"];
         if (authType == "OAuth") {
@@ -43,5 +57,9 @@ public class AppSettings {
 
     public EmailSetting getEmailConfig() {
         return EmailSetting;
+    }
+
+    public ApiSetting getApiConfig() {
+        return ApiSetting;
     }
 }

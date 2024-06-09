@@ -1,4 +1,3 @@
-using System.Globalization;
 using MimeKit;
 using MailKit.Net.Smtp;
 using Google.Apis.Auth.OAuth2;

@@ -4,7 +4,7 @@ namespace B3Alert
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             if (args.Length < 3)
             {
@@ -18,20 +18,38 @@ namespace B3Alert
 
             Console.WriteLine(stock + sellPrice + buyPrice);
 
-            var appSettings = new AppSettings();
-            // var mailConfig = appSettings.getEmailConfig();
-            MailAlert.Send(appSettings, getBuyMessage(stock, buyPrice, (decimal)100.0));
-            MailAlert.Send(appSettings, getSellMessage(stock, sellPrice, (decimal)200.0));
+            await MonitoringQuotation(
+                new AppSettings(),
+                stock,
+                sellPrice,
+                buyPrice
+            );
+        }
 
-            Console.ReadLine();
+        private static async Task MonitoringQuotation(AppSettings appSettings, string stock, decimal sellPrice, decimal buyPrice) {
+            while(true) {
+                decimal currentPrice = await QuotationApi.GetStockPrice(appSettings, stock);
+                Console.WriteLine($"Cotação atual de {stock}: {currentPrice}");
+
+                if (currentPrice > sellPrice)
+                {
+                    MailAlert.Send(appSettings, getSellMessage(stock, sellPrice, currentPrice));
+                }
+                else if (currentPrice < buyPrice)
+                {
+                    MailAlert.Send(appSettings, getBuyMessage(stock, buyPrice, currentPrice));
+                }
+
+                await Task.Delay(60000); // Aguardar 1 minuto antes de verificar novamente
+            }
         }
 
         private static string getBuyMessage(string stock, decimal buyPrice, decimal actualPrice) {
-            return $"A ação {stock} está abaixo ou igual ao preço desejado de compra. O valor desejado é de R${buyPrice} e o valor atual é de R${actualPrice}.";
+            return $"A ação {stock} está abaixo do preço desejado de compra. O valor desejado é de R${buyPrice} e o valor atual é de R${actualPrice}.";
         }
 
         private static string getSellMessage(string stock, decimal sellPrice, decimal actualPrice) {
-            return $"A ação {stock} está acima ou igual ao preço desejado de venda. O valor desejado é de R${sellPrice} e o valor atual é de R${actualPrice}.";
+            return $"A ação {stock} está acima do preço desejado de venda. O valor desejado é de R${sellPrice} e o valor atual é de R${actualPrice}.";
         }
     }
 }
