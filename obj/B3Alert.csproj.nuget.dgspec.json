@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/home/leticia/Documentos/B3Alert/B3Alert.csproj": {}
+    "C:\\Users\\lepfa\\Documents\\projects\\B3Alert\\B3Alert.csproj": {}
   },
   "projects": {
-    "/home/leticia/Documentos/B3Alert/B3Alert.csproj": {
+    "C:\\Users\\lepfa\\Documents\\projects\\B3Alert\\B3Alert.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/leticia/Documentos/B3Alert/B3Alert.csproj",
+        "projectUniqueName": "C:\\Users\\lepfa\\Documents\\projects\\B3Alert\\B3Alert.csproj",
         "projectName": "B3Alert",
-        "projectPath": "/home/leticia/Documentos/B3Alert/B3Alert.csproj",
-        "packagesPath": "/home/leticia/.nuget/packages/",
-        "outputPath": "/home/leticia/Documentos/B3Alert/obj/",
+        "projectPath": "C:\\Users\\lepfa\\Documents\\projects\\B3Alert\\B3Alert.csproj",
+        "packagesPath": "C:\\Users\\lepfa\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\lepfa\\Documents\\projects\\B3Alert\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/leticia/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\lepfa\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -42,6 +42,28 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "Google.Apis.Auth": {
+              "target": "Package",
+              "version": "[1.68.0, )"
+            },
+            "MailKit": {
+              "target": "Package",
+              "version": "[4.6.0, )"
+            },
+            "Microsoft.Extensions.Configuration.Json": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "MimeKit": {
+              "target": "Package",
+              "version": "[4.6.0, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -58,7 +80,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/home/leticia/.dotnet/sdk/8.0.301/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.301/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
