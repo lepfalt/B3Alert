@@ -1,50 +1,47 @@
 using Microsoft.Extensions.Configuration;
 
 class AppSettings {
-    private EmailSetting EmailSettings { get; set; }
-    private EmailOAuthSetting EmailOAuthSettings { get; set; }
+    private EmailSetting EmailSetting { get; set; }
 
     public AppSettings() {
-        LoadConfigs();
-    }
-
-    private void LoadConfigs() {
         var builder = new ConfigurationBuilder()
         .SetBasePath(Directory.GetCurrentDirectory())
         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
         IConfiguration configuration = builder.Build();
-        
-//        var emailSetting = new EmailSetting();
+
         var emailSettingsInfo = configuration.GetSection("EmailSettings");
         var authType = emailSettingsInfo["AuthType"];
         if (authType == "OAuth") {
             var oAuthSetting = emailSettingsInfo.GetSection("OAuth");
-            EmailOAuthSettings = new EmailOAuthSetting(
+            EmailSetting = new OAuthMailSetting(
                 clientId: oAuthSetting["ClientId"],
-                clientSecret: oAuthSetting["ClientSecret"]
+                clientSecret: oAuthSetting["ClientSecret"],
+                authUri: oAuthSetting["AuthUri"],
+                recipientEmail: emailSettingsInfo["RecipientEmail"],
+                senderEmail: emailSettingsInfo["SenderEmail"],
+                smtpServer: emailSettingsInfo["SmtpServer"],
+                smtpPort: int.Parse(emailSettingsInfo["SmtpPort"]),
+                senderUser: emailSettingsInfo["SenderUser"]
             );
         } else {
             var basicSetting = emailSettingsInfo.GetSection("Basic");
-            EmailSettings = new EmailSetting(
-                recipient: basicSetting["RecipientEmail"],
-                sender: basicSetting["SenderEmail"],
+            EmailSetting = new BasicMailSetting(
+                recipientEmail: basicSetting["RecipientEmail"],
+                senderEmail: basicSetting["SenderEmail"],
                 smtpServer: basicSetting["SmtpServer"],
                 smtpPort: int.Parse(basicSetting["SmtpPort"]),
+                senderUser: emailSettingsInfo["SenderUser"],
                 senderPassword: basicSetting["SenderPassword"]
             );
         }
     }
 
     public bool isBasicAuth() {
-        return EmailSettings != null;
+        return EmailSetting is BasicMailSetting;
     }
 
-    public EmailSetting getEmailBasicConfig() {
-        return EmailSettings;
-    }
-
-    public EmailOAuthSetting GetEmailOAuthSetting() {
-        return EmailOAuthSettings;
+    public EmailSetting getEmailConfig() {
+        return EmailSetting;
     }
 }

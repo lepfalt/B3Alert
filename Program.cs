@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Globalization;
+﻿using System.Globalization;
 using MimeKit;
 using MailKit.Net.Smtp;
 using Google.Apis.Auth.OAuth2;
@@ -26,36 +24,41 @@ namespace B3Alert
             Console.WriteLine(stock + sellPrice + buyPrice);
 
             var appSettings = new AppSettings();
-            if (appSettings.isBasicAuth()) {
-                var emailConfig = appSettings.getEmailBasicConfig();
-                SendEmailAlert(emailConfig, null);
-            } else {
-                var emailOAuthConfig = appSettings.GetEmailOAuthSetting();
-                SendEmailAlert(null, emailOAuthConfig);
-            }
+            SendEmailAlert(appSettings, getBuyMessage(stock, buyPrice, (decimal)100.0));
+            SendEmailAlert(appSettings, getSellMessage(stock, sellPrice, (decimal)200.0));
 
             Console.ReadLine();
         }
 
-        private static void SendEmailAlert(EmailSetting? emailConfig, EmailOAuthSetting? emailOAuthConfig) {
-            var message = new MimeMessage();
-            message.Subject = "Teste B3Alert";
-            message.Body = new TextPart("plain") {
-                Text = "Isso é um teste"
-            };
-
-            if (emailConfig != null) {
-                message.From.Add(new MailboxAddress("", emailConfig.SenderEmail));
-                message.To.Add(new MailboxAddress("", emailConfig.RecipientEmail));
-                ConnectInBasicMode(emailConfig, message);
-            } else {
-                ConnectInOAuthMode(emailOAuthConfig, message);
-            }
-
-            Console.WriteLine("Email enviado.");
+        private static string getBuyMessage(string stock, decimal buyPrice, decimal actualPrice) {
+            return $"A ação {stock} está abaixo ou igual ao preço desejado de compra. O valor desejado é de R${buyPrice} e o valor atual é de R${actualPrice}.";
         }
 
-        private static void ConnectInOAuthMode(EmailOAuthSetting emailOAuthConfig, MimeMessage message) {
+        private static string getSellMessage(string stock, decimal sellPrice, decimal actualPrice) {
+            return $"A ação {stock} está acima ou igual ao preço desejado de venda. O valor desejado é de R${sellPrice} e o valor atual é de R${actualPrice}.";
+        }
+
+        private static void SendEmailAlert(AppSettings appSettings, string messageToBeSend) {
+            var message = new MimeMessage();
+            message.Subject = "B3 Alert";
+            message.Body = new TextPart("plain") {
+                Text = messageToBeSend
+            };
+
+            var emailConfig = appSettings.getEmailConfig();
+            message.From.Add(new MailboxAddress("", emailConfig.SenderEmail));
+            message.To.Add(new MailboxAddress("", emailConfig.RecipientEmail));
+
+            if (appSettings.isBasicAuth()) {
+                ConnectInBasicMode(emailConfig as BasicMailSetting, message);
+            } else {
+                ConnectInOAuthMode(emailConfig as OAuthMailSetting, message);
+            }
+
+            Console.WriteLine("E-mail enviado com sucesso!");
+        }
+
+        private static void ConnectInOAuthMode(OAuthMailSetting emailOAuthConfig, MimeMessage message) {
             var clientSecrets = new ClientSecrets {
                 ClientId = emailOAuthConfig.ClientId,
                 ClientSecret = emailOAuthConfig.ClientSecret
@@ -63,27 +66,24 @@ namespace B3Alert
 
             var credential = GoogleWebAuthorizationBroker.AuthorizeAsync(
                 clientSecrets,
-                new[] { "https://mail.google.com/" },
-                "lepfalt.dev",
+                new[] { emailOAuthConfig.AuthUri },
+                emailOAuthConfig.SenderUser,
                 CancellationToken.None,
                 new FileDataStore("token.json", true)
             );
 
             var client = new SmtpClient();
-            client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+            client.Connect(emailOAuthConfig.SmtpServer, emailOAuthConfig.SmtpPort, MailKit.Security.SecureSocketOptions.StartTls);
 
             var oauth2 = new SaslMechanismOAuth2(credential.Result.UserId, credential.Result.Token.AccessToken);
             client.Authenticate(oauth2);
 
-            message.From.Add(new MailboxAddress("", "lepfalt.dev@gmail.com"));
-            message.To.Add(new MailboxAddress("", "lepfalt.dev@gmail.com"));
             client.Send(message);
-            Console.WriteLine("E-mail enviado com sucesso!");
         }
 
-        private static void ConnectInBasicMode(EmailSetting emailConfig, MimeMessage message) {
+        private static void ConnectInBasicMode(BasicMailSetting emailConfig, MimeMessage message) {
             var client = new SmtpClient();
-            client.Connect(emailConfig.SmtpServer, emailConfig.SmtpPort, MailKit.Security.SecureSocketOptions.StartTls);
+            client.Connect(emailConfig.SmtpServer, emailConfig.SmtpPort, SecureSocketOptions.StartTls);
             client.Authenticate(emailConfig.SenderEmail, emailConfig.SenderPassword);
             client.Send(message);
             client.Disconnect(true);

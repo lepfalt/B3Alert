@@ -1,15 +1,17 @@
-class EmailSetting {
+abstract class EmailSetting {
+    // public string AuthType { get; set; }
     public string RecipientEmail { get; set; }
     public string SmtpServer { get; set; }
     public int SmtpPort { get; set; }
     public string SenderEmail { get; set; }
-    public string SenderPassword { get; set; }
+    public string SenderUser { get; set; }
 
-    public EmailSetting(string recipient, string sender, string smtpServer, int smtpPort, string senderPassword) {
-        RecipientEmail = recipient;
-        SenderEmail = sender;
+    public EmailSetting(string recipientEmail, string senderEmail, string smtpServer, int smtpPort, string senderUser) {
+        // AuthType = authType;
+        RecipientEmail = recipientEmail;
+        SenderEmail = senderEmail;
         SmtpServer = smtpServer;
         SmtpPort = smtpPort;
-        SenderPassword = senderPassword;
+        SenderUser = senderUser;
     }
 }
