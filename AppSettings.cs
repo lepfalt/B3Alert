@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 
-class AppSettings {
+public class AppSettings {
     private EmailSetting EmailSetting { get; set; }
 
     public AppSettings() {

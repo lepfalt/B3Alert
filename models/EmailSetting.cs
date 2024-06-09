@@ -1,4 +1,4 @@
-abstract class EmailSetting {
+public abstract class EmailSetting {
     // public string AuthType { get; set; }
     public string RecipientEmail { get; set; }
     public string SmtpServer { get; set; }
