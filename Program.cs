@@ -8,15 +8,15 @@ namespace B3Alert
         {
             if (args.Length < 3)
             {
-                Console.WriteLine("Usage: dotnet run -- <stock> <sell-price> <buy-price>");
+                Console.WriteLine("Use o seguinte formato: dotnet run -- <stock> <sell-price> <buy-price>");
                 return;
             }
 
             string stock = args[0];
-            decimal sellPrice = decimal.Parse(args[1], CultureInfo.InvariantCulture); // InvariantCulture garante que o ponto será considerado como separador decimal
-            decimal buyPrice = decimal.Parse(args[2], CultureInfo.InvariantCulture);
+            decimal sellPrice = ParseToDecimal(args[1]);
+            decimal buyPrice = ParseToDecimal(args[2]);
 
-            Console.WriteLine(stock + sellPrice + buyPrice);
+            Console.WriteLine($"Monitorando ativo {stock} - Preço base venda: {sellPrice}, Preço base compra: {buyPrice}..");
 
             await MonitoringQuotation(
                 new AppSettings(),
@@ -24,6 +24,14 @@ namespace B3Alert
                 sellPrice,
                 buyPrice
             );
+        }
+
+        private static decimal ParseToDecimal(string value) {
+            try {
+                return decimal.Parse(value, CultureInfo.InvariantCulture); // InvariantCulture garante que o ponto será considerado como separador decimal
+            } catch (FormatException) {
+                throw new InputRequireException($"Argumento inválido: {value}. Para correção use o seguinte formato: dotnet run -- <stock:string> <sell-price:decimal> <buy-price:decimal>");
+            }
         }
 
         private static async Task MonitoringQuotation(AppSettings appSettings, string stock, decimal sellPrice, decimal buyPrice) {
